@@ -11,6 +11,8 @@ library(plyr)
 library(glmmTMB)
 library(fBasics)
 
+invlogit = function(x) 1/(1+exp(-x))
+
 # load results
 load(file="betamat.RData")
 load(file="Gotland_betas.RData")
@@ -87,6 +89,7 @@ names(rmflist)[6] = "Dactylorhiza_lapponica_Gotland_2020"
 # Deposition-removal correlations
 round(unlist(rmflist), 2)
 median(unlist(rmflist))
+range(unlist(rmflist))
 
 # Compile parameter tables
 
@@ -225,15 +228,10 @@ legend(90, 100, pch=16, col=cols, legend=c("Flowers", "Height", "Flower size", "
 
 dev.off()
 
-
-invlogit = function(x) 1/(1+exp(-x))
-
-
+# Misc plots ####
 vmat
-
 xx = seq(-1, 1, length.out=10)
 cols = 1:6
-
 
 x11(height=3.5, width=9)
 par(mfrow=c(1,3))
@@ -283,22 +281,13 @@ for(i in 1:6){
   lines(xx, yy, col=cols[i])
 }
 
-
 # Deposition vs. removal ####
-
 fmat
 mmat
 
-plot(fmat$flowers_open_c, mmat$flowers_open_c)
 cor(fmat$flowers_open_c, mmat$flowers_open_c)
-
-plot(fmat$height_c, mmat$height_c)
 cor(fmat$height_c, mmat$height_c)
-
-plot(fmat$flower_size_c, mmat$flower_size_c)
 cor(fmat$flower_size_c, mmat$flower_size_c)
-
-plot(fmat$spur_length_c, mmat$spur_length_c)
 cor(fmat$spur_length_c, mmat$spur_length_c)
 
 cols = divPalette(4, "Spectral")

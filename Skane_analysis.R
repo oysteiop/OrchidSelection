@@ -11,7 +11,6 @@ library(mgcv)
 library(MuMIn)
 
 rm(list=ls())
-setwd("C:/data/Dactylorhiza/")
 
 invlogit = function(x) 1/(1+exp(-x))
 
@@ -47,11 +46,13 @@ fitnessdata$dataset = as.factor(fitnessdata$dataset)
 fitnessdata$ind = paste0(fitnessdata$species, "_", fitnessdata$ind)
 
 # Compile fitness data per individual ####
-wdata = ddply(fitnessdata, .(ind), summarize,
-              recorder_w = recorder[1],
+fitnessdata2 = subset(fitnessdata, select=c("ind", "flower", "pollinaria_removed", "pollen_on_stigma"))
+fitnessdata2 = na.omit(fitnessdata2)
+
+wdata = ddply(fitnessdata2, .(ind), summarize,
               n = sum(flower>0, na.rm=T),
-              n_removed = sum(pollinaria_removed),
-              n_pollinated = sum(pollen_on_stigma))
+              n_removed = sum(pollinaria_removed, na.rm=T),
+              n_pollinated = sum(pollen_on_stigma, na.rm=T))
 
 wdata$w_female = wdata$n_pollinated/wdata$n
 wdata$w_male = wdata$n_removed/(wdata$n*2)
@@ -93,10 +94,9 @@ fulldat = dat
 # Select dataset ####
 levels(dat$dataset)
 
-#seldata = "Dactylorhiza_majalis_Knivsaasen_2020_early"
-
 # All datasets
 studies = levels(dat$dataset)[c(2,4,5,1,8)]
+studies
 
 betamat = matrix(NA, ncol=5, nrow=5)
 SEmat = matrix(NA, ncol=5, nrow=5)
@@ -154,18 +154,12 @@ colnames(P) = rownames(P) = c("height", "flowers", "flower_size", "spur_length")
 
 pmatlist[[s]] = P
 
-# Fitting the component models models ####
+# Fitting the component models ####
 
 # Define visitation
 rmf = cor(dat$w_female, dat$w_male, use="pairwise") # Correlation between pollen deposition and pollinarium removal
 
 rmflist[[s]] = rmf
-
-dat$recorder_w = factor(dat$recorder_w)
-table(dat$recorder_w)
-
-dat$recorder_z = factor(dat$recorder_z)
-table(dat$recorder_z)
 
 moddat = na.omit(subset(dat, select = c(patch, n, visited, w_male, w_female, 
                                         height_c, flowers, flowers_open_c, flower_size_c, spur_length_c)))
@@ -175,7 +169,6 @@ mv0 = glmmTMB(visited ~ 1 + (1|patch), family="binomial", data=moddat)
 
 mv = glmmTMB(visited ~ height_c + flowers_open_c + flower_size_c + (1|patch), 
              family="binomial", data=moddat)
-
 
 
 mvlist[[s]] = list(mv, signif(r.squaredGLMM(mv)[1,1], 3))
@@ -232,7 +225,7 @@ rr = summary(mv)$coef$cond[,1]
 pd = data.frame(Intercept=rep(1, nrow(dat)), subset(dat, select = names(rr[-1])))
 predvis = invlogit(as.matrix(pd) %*% as.matrix(rr))
 
-# Poll
+# Pollen deposition
 rr = summary(mf)$coef$cond[,1]
 pd = data.frame(Intercept=rep(1, nrow(dat)), subset(dat, select = names(rr[-1])))
 predpoll = invlogit(as.matrix(pd) %*% as.matrix(rr))
@@ -265,7 +258,7 @@ for(i in 1:nbot){
   pd = data.frame(Intercept=rep(1, nrow(dat)), subset(dat, select = names(rr[-1])))
   predvis = invlogit(as.matrix(pd) %*% as.matrix(rr))
   
-  # Poll
+  # Pollen deposition
   rr = MASS::mvrnorm(1, mu=summary(mf)$coef$cond[,1], Sigma=vcov(mf)[[1]])
   pd = data.frame(Intercept=rep(1, nrow(dat)), subset(dat, select = names(rr[-1])))
   predpoll = invlogit(as.matrix(pd) %*% as.matrix(rr))

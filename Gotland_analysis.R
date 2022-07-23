@@ -325,12 +325,13 @@ save(naivemod, file="Gotland_mnaive.RData")
 # Figures ####
 
 # Visitation
-coefs = summary(mv)$coef$cond
+coefs = summary(mv)$coef
 a1 = coefs[1,1]
 b1_height = coefs[2,1]
 b1_flowers = coefs[3,1]
 b1_flower_size = coefs[4,1]
 
+x11()
 par(mfrow=c(1,3))
 
 plot(dat$height_c, dat$visited)
@@ -349,7 +350,7 @@ yy = invlogit(a1 + b1_flower_size*xx)
 lines(xx,yy)
 
 # Pollination
-coefs = summary(mf)$coef$cond
+coefs = summary(mf)$coef
 a2 = coefs[1,1]
 b2_height = coefs[2,1]
 b2_flowers = coefs[3,1]
@@ -389,7 +390,7 @@ lines(xx,yy)
 
 # Fruitset
 par(mfrow=c(1,1))
-plot(wdat$w_female, wdat$fruits_total/wdat$flowers)
+plot(wdat$w_female, wdat$fruit_number/wdat$flowers)
 
 a3 = summary(mw)$coef[1,1]
 b3_w_female = summary(mw)$coef[2,1]
