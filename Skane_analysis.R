@@ -18,7 +18,7 @@ invlogit = function(x) 1/(1+exp(-x))
 traitdata = read.table("data_2021/traitdata2021.txt", header=T)
 fitnessdata = read.table("data_2021/fitnessdata2021.txt", header=T)
 
-# Data formatting
+# Data formatting ####
 traitdata$dataset = paste0(traitdata$site, "_", traitdata$year, "_", traitdata$period)
 traitdata$dataset = as.factor(traitdata$dataset)
 traitdata$ind = paste0(traitdata$dataset, "_", traitdata$individual)
@@ -45,7 +45,7 @@ fitnessdata$dataset = paste0(fitnessdata$species, "_", fitnessdata$dataset)
 fitnessdata$dataset = as.factor(fitnessdata$dataset)
 fitnessdata$ind = paste0(fitnessdata$species, "_", fitnessdata$ind)
 
-# Compile fitness data per individual ####
+# Compile fitness data per individual
 fitnessdata2 = subset(fitnessdata, select=c("ind", "flower", "pollinaria_removed", "pollen_on_stigma"))
 fitnessdata2 = na.omit(fitnessdata2)
 
@@ -89,12 +89,10 @@ names(dat)
 
 fulldat = dat
 
-#### Start of analyses ####
+# Start of analyses ####
 
-# Select dataset ####
+# Datasets
 levels(dat$dataset)
-
-# All datasets
 studies = levels(dat$dataset)[c(2,4,5,1,8)]
 studies
 
@@ -114,8 +112,9 @@ aiclist = list()
 r2list = list()
 mnaivelist = list()
 
-nbot = 1000
+nbot = 10
 
+# Run analysis ####
 for(s in 1:5){
 
 seldata = studies[s]
@@ -136,9 +135,7 @@ dat$flower_size_c = scale(dat$flower_size, scale=F)/mean(dat$flower_size, na.rm=
 dat$spur_length_c = scale(dat$spur_length, scale=F)/mean(dat$spur_length, na.rm=T)
 dat$spur_width_c = scale(dat$spur_width, scale=F)/mean(dat$spur_width, na.rm=T)
 
-# Summary statistics ####
-
-# Trait means, variances, and coefficients of variation
+# Summary statistics
 summary_stats = data.frame(mean = apply(dat[,c("height", "flowers", "flower_size", "spur_length", "fruits_total", "visited", "w_female", "w_male")], 2, mean, na.rm=T),
                            sd = apply(dat[,c("height", "flowers", "flower_size", "spur_length", "fruits_total", "visited", "w_female", "w_male")], 2, sd, na.rm=T),
                            n_obs = apply(dat[,c("height", "flowers", "flower_size", "spur_length", "fruits_total",  "visited", "w_female", "w_male")], 2, function(x) sum(!is.na(x), na.rm=T)),
@@ -154,7 +151,7 @@ colnames(P) = rownames(P) = c("height", "flowers", "flower_size", "spur_length")
 
 pmatlist[[s]] = P
 
-# Fitting the component models ####
+# Fitting the component models
 
 # Define visitation
 rmf = cor(dat$w_female, dat$w_male, use="pairwise") # Correlation between pollen deposition and pollinarium removal
@@ -218,7 +215,7 @@ summary(mw)
 
 mwlist[[s]] = list(mw, signif(r.squaredGLMM(mw)[1,1], 3))
 
-# Compute selection gradients ####
+# Compute selection gradients
 
 # Visitation
 rr = summary(mv)$coef$cond[,1]
@@ -242,7 +239,7 @@ dat$predfruits = predfruits
 
 # Selection model
 relfit = predfruits/mean(predfruits, na.rm=T)
-ms = lm(relfit ~ flowers_open_c + height_c + flower_size_c + spur_length_c, dat=dat)
+ms = lm(relfit ~ flowers_open_c + height_c + flower_size_c + spur_length_c, na=na.exclude, dat=dat)
 betas = summary(ms)$coef[,1]
 
 betas*100
@@ -275,7 +272,7 @@ for(i in 1:nbot){
   
   # Selection model
   relfit = predfruits/mean(predfruits, na.rm=T)
-  ms = lm(relfit~flowers_open_c + height_c + flower_size_c + spur_length_c, dat=dat)
+  ms = lm(relfit~flowers_open_c + height_c + flower_size_c + spur_length_c, na=na.exclude, dat=dat)
   
   betaList[[i]] = summary(ms)$coef[,1]
   
@@ -292,7 +289,7 @@ apply(betaDat, 2, quantile, c(0.025, 0.975))*100
 betamat[s,] = betas*100
 SEmat[s,] = apply(betaDat, 2, sd)*100
 
-# Evaluating AIC support ####
+# Evaluating AIC support
 
 AICff = AIC(mv) + AIC(mf)
 AIC0 = AIC(mv0) + AIC(mf0)
@@ -316,7 +313,7 @@ dat = fulldat
 
 }
 
-# Save results
+# Save results ####
 save(betamat, file="betamat.RData")
 save(SEmat, file="SEmat.RData")
 
@@ -420,5 +417,3 @@ plot(dat$height, relfit)
 plot(dat$flowers_open, relfit)
 plot(dat$spur_length, relfit)
 plot(dat$flower_size, relfit)
-
-

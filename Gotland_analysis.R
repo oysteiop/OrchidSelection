@@ -34,7 +34,7 @@ summary(wdata)
 head(wdata)
 
 rmf = cor(wdata$w_female, wdata$w_male)
-Gotland_rmf = save(rmf, file="Gotland_rmf.RData")
+Gotland_rmf = save(rmf, file="results/Gotland_rmf.RData")
 
 # Define visitation
 visited <- 1*((wdata$w_female + wdata$w_male)>0)
@@ -88,14 +88,14 @@ summary_stats$cv[6:8] = NA #The CV is not valid for the proportional variables
 
 signif(summary_stats, 4)
 
-Gotland_ss = save(summary_stats, file="Gotland_ss.RData")
+Gotland_ss = save(summary_stats, file="results/Gotland_ss.RData")
 
 # Phenotypic correlation matrix ####
 P = cor(cbind(dat$height, dat$flowers, dat$flower_size, dat$spur_length,dat$spur_width), use="pairwise")
 colnames(P) = rownames(P) = c("height", "flowers", "flower_size", "spur_length", "spur_width")
 signif(P, 3)
 
-Gotland_pmat = save(P, file="Gotland_pmat.RData")
+Gotland_pmat = save(P, file="results/Gotland_pmat.RData")
 
 # Fitting the component models ####
 
@@ -131,7 +131,7 @@ AICtab[order(AICtab$AIC),]
 
 mvsum = list(mv, signif(r.squaredGLMM(mv)[1,1], 3))
 
-Gotland_mv = save(mvsum, file="Gotland_mv.RData")
+Gotland_mv = save(mvsum, file="results/Gotland_mv.RData")
 
 # Pollination conditional on visitation
 vdat = moddat[which(moddat$visited>0),]
@@ -142,7 +142,7 @@ mean(vdat$w_female, na.rm=T)
 mean(vdat$w_male, na.rm=T)
 
 Gotland_pr = c(percentage_visited, mean(vdat$w_female), mean(vdat$w_male))
-save(Gotland_pr, file = "Gotland_pr.RData")
+save(Gotland_pr, file = "results/Gotland_pr.RData")
 
 # Pollen deposition
 mf0 = glm(w_female ~ 1, family="binomial", weights=n, data=vdat)
@@ -167,7 +167,7 @@ AICtab = AIC(mf0, mf, mf1, mf2, mf3, mf4, mf5, mf6, mf7, mf8, mf9, mf10, mf11, m
 AICtab[order(AICtab$AIC),]
 
 mfsum = list(mf, signif(r.squaredGLMM(mf)[1,1], 3))
-Gotland_mf = save(mfsum, file="Gotland_mf.RData")
+Gotland_mf = save(mfsum, file="results/Gotland_mf.RData")
 
 # Pollinarium removal
 mm0 = glm(w_male ~ 1, family="binomial", weights=n*2, data=vdat)
@@ -193,7 +193,7 @@ AICtab[order(AICtab$AIC),]
 
 mmsum = list(mm, signif(r.squaredGLMM(mm)[1,1], 3))
 
-Gotland_mm = save(mmsum, file="Gotland_mm.RData")
+Gotland_mm = save(mmsum, file="results/Gotland_mm.RData")
 
 # Fruit set analysis
 wdat = na.omit(subset(dat, select = c(n, visited, w_female, fruit_number, flowers)))
@@ -212,7 +212,7 @@ summary(mw)
 
 mwsum = list(mw, signif(r.squaredGLMM(mw)[1,1], 3))
 
-Gotland_mw = save(mwsum, file="Gotland_mw.RData")
+Gotland_mw = save(mwsum, file="results/Gotland_mw.RData")
 
 # Compute selection gradients
 par(mfrow=c(1,1))
@@ -243,7 +243,7 @@ hist(predfruits)
 
 # Selection model
 relfit = predfruits/mean(predfruits, na.rm=T)
-ms = lm(relfit ~ flowers_open_c + height_c + flower_size_c + spur_length_c, dat=dat)
+ms = lm(relfit ~ flowers_open_c + height_c + flower_size_c + spur_length_c, na=na.exclude, dat=dat)
 betas = summary(ms)$coef[,1]
 
 betas*100
@@ -276,7 +276,7 @@ for(i in 1:1000){
   
   # Selection model
   relfit = predfruits/mean(predfruits, na.rm=T)
-  ms = lm(relfit~flowers_open_c + height_c + flower_size_c + spur_length_c, dat=dat)
+  ms = lm(relfit~flowers_open_c + height_c + flower_size_c + spur_length_c, na=na.exclude, dat=dat)
   
   betaList[[i]] = summary(ms)$coef[,1]
   
@@ -291,8 +291,8 @@ betas = betas*100
 ses = apply(betaDat, 2, sd)*100
 apply(betaDat, 2, quantile, c(0.025, 0.975))*100
 
-save(betas, file="Gotland_betas.RData")
-save(ses, file="Gotland_ses.RData")
+save(betas, file="results/Gotland_betas.RData")
+save(ses, file="results/Gotland_ses.RData")
 
 # Evaluating AIC support ####
 
@@ -305,7 +305,7 @@ AICff
 AIC0
 aicval = AIC0-AICff
 
-save(aicval, file="Gotland_aic.RData")
+save(aicval, file="results/Gotland_aic.RData")
 
 par(mfrow=c(1,1))
 sel = which(dat$fruit_number>0)
@@ -313,14 +313,14 @@ plot(dat$fruit_number[sel], dat$predfruits[sel])
 lines(-10:100, -10:100)
 r2 = cor(dat$fruit_number[sel], dat$predfruits[sel], "pairwise")^2 # Overall r^2 for fitness function
 
-save(r2, file="Gotland_r2.Rdata")
+save(r2, file="results/Gotland_r2.Rdata")
 
 # Naive analysis ####
 obs_relfit = dat$fruit_number/mean(dat$fruit_number, na.rm=T)
 
 naivemod = lm(obs_relfit~height_c+flowers_open_c+flower_size_c+spur_length_c, na=na.exclude, dat=dat)
 
-save(naivemod, file="Gotland_mnaive.RData")
+save(naivemod, file="results/Gotland_mnaive.RData")
 
 # Figures ####
 

@@ -14,73 +14,73 @@ library(fBasics)
 invlogit = function(x) 1/(1+exp(-x))
 
 # load results
-load(file="betamat.RData")
-load(file="Gotland_betas.RData")
+load(file="results/betamat.RData")
+load(file="results/Gotland_betas.RData")
 betamat = as.data.frame(betamat)
 betamat[6,] = betas
 rownames(betamat)[6]  = "Dactylorhiza_lapponica_Gotland_2020"
 
-load(file="SEmat.RData")
-load(file="Gotland_ses.RData")
+load(file="results/SEmat.RData")
+load(file="results/Gotland_ses.RData")
 SEmat = as.data.frame(SEmat)
 SEmat[6,] = ses
 rownames(SEmat)[6]  = "Dactylorhiza_lapponica_Gotland_2020"
 
-load(file="sslist.RData")
-load(file="Gotland_ss.RData")
+load(file="results/sslist.RData")
+load(file="results/Gotland_ss.RData")
 sslist[[6]] = summary_stats
 names(sslist)[6] = "Dactylorhiza_lapponica_Gotland_2020"
 
-load(file="prlist.RData")
-load(file="Gotland_pr.RData")
+load(file="results/prlist.RData")
+load(file="results/Gotland_pr.RData")
 prlist[[6]] = Gotland_pr
 names(prlist)[6] = "Dactylorhiza_lapponica_Gotland_2020"
 prDat = rbind.fill(lapply(prlist, function(x) as.data.frame(t(x))))
 rownames(prDat) = names(prlist)
 
-load(file="pmatlist.RData")
-load(file="Gotland_pmat.RData")
+load(file="results/pmatlist.RData")
+load(file="results/Gotland_pmat.RData")
 pmatlist[[6]] = P
 names(pmatlist)[6] = "Dactylorhiza_lapponica_Gotland_2020"
 
-load(file="mvlist.RData")
-load(file="Gotland_mv.RData")
+load(file="results/mvlist.RData")
+load(file="results/Gotland_mv.RData")
 mvlist[[6]] = mvsum
 names(mvlist)[6] = "Dactylorhiza_lapponica_Gotland_2020"
 
-load(file="mflist.RData")
-load(file="Gotland_mf.RData")
+load(file="results/mflist.RData")
+load(file="results/Gotland_mf.RData")
 mflist[[6]] = mfsum
 names(mflist)[6] = "Dactylorhiza_lapponica_Gotland_2020"
 
-load(file="mmlist.RData")
-load(file="Gotland_mm.RData")
+load(file="results/mmlist.RData")
+load(file="results/Gotland_mm.RData")
 mmlist[[6]] = mmsum
 names(mmlist)[6] = "Dactylorhiza_lapponica_Gotland_2020"
 
-load(file="mwlist.RData")
-load(file="Gotland_mw.RData")
+load(file="results/mwlist.RData")
+load(file="results/Gotland_mw.RData")
 mwlist[[6]] = mwsum
 names(mwlist)[6] = "Dactylorhiza_lapponica_Gotland_2020"
 
-load(file="aiclist.RData")
-load(file="Gotland_aic.RData")
+load(file="results/aiclist.RData")
+load(file="results/Gotland_aic.RData")
 aiclist[[6]] = aicval
 names(aiclist)[6] = "Dactylorhiza_lapponica_Gotland_2020"
 
-load(file="r2list.RData")
-load(file="Gotland_r2.RData")
+load(file="results/r2list.RData")
+load(file="results/Gotland_r2.RData")
 r2list[[6]] = r2
 names(r2list)[6] = "Dactylorhiza_lapponica_Gotland_2020"
 
-load(file="mnaivelist.RData")
-load(file="Gotland_mnaive.RData")
+load(file="results/mnaivelist.RData")
+load(file="results/Gotland_mnaive.RData")
 mnaivelist[[6]] = naivemod
 #names(mnaivelist)[6] = "Dactylorhiza_lapponica_Gotland_2020"
 names(mnaivelist) = names(r2list)
 
-load(file="rmflist.RData")
-load(file="Gotland_rmf.RData")
+load(file="results/rmflist.RData")
+load(file="results/Gotland_rmf.RData")
 rmflist[[6]] = rmf
 names(rmflist)[6] = "Dactylorhiza_lapponica_Gotland_2020"
 
@@ -164,36 +164,6 @@ rownames(betatable)[7:9] = c("Mean", "SD", "SDcor")
 
 round(betatable, 1)
 
-# Beta naive summary ####
-
-naivemat = data.frame(
-summary(mnaivelist[[1]])$coef[-1,1],
-summary(mnaivelist[[2]])$coef[-1,1],
-summary(mnaivelist[[3]])$coef[-1,1],
-summary(mnaivelist[[6]])$coef[-1,1]
-)
-colnames(naivemat) = names(mnaivelist)[c(1:3, 6)]
-
-naivemat = as.data.frame(t(naivemat))
-naivemat
-
-betatable
-
-cor(betatable$Flowers[c(1:3,6)], naivemat$flowers_open_c*100)
-cor(betatable$Height[c(1:3,6)], naivemat$height_c*100)
-cor(betatable$`Flower size`[c(1:3,6)], naivemat$flower_size_c*100)
-cor(betatable$`Spur length`[c(1:3,6)], naivemat$spur_length_c*100)
-
-x11()
-plot(betatable$`Spur length`[c(1:3,6)], naivemat$spur_length_c*100,
-     xlim=c(-50, 100), ylim=c(-50, 200))
-lines(-100:200, -100:200)
-points(betatable$`Flower size`[c(1:3,6)], naivemat$flower_size_c*100, col="blue", pch=16)
-points(betatable$Height[c(1:3,6)], naivemat$height_c*100, col="brown", pch=16)
-points(betatable$Flowers[c(1:3,6)], naivemat$flowers_open_c*100, col="green", pch=16)
-abline(h=0, lty=2)
-abline(v=0, lty=2)
-
 # Betas plot
 
 cairo_pdf("BetaPlot.pdf", width=10, height=4, fam="Times")
@@ -227,59 +197,6 @@ legend(90, 100, pch=16, col=cols, legend=c("Flowers", "Height", "Flower size", "
 
 
 dev.off()
-
-# Misc plots ####
-vmat
-xx = seq(-1, 1, length.out=10)
-cols = 1:6
-
-x11(height=3.5, width=9)
-par(mfrow=c(1,3))
-
-plot(xx, seq(0, 1, length.out=10), col="white")
-for(i in 1:6){
-  yy = invlogit(vmat[i,1]+xx*vmat[i,2])
-  lines(xx, yy, col=cols[i])
-}
-
-plot(xx, seq(0, 1, length.out=10), col="white")
-for(i in 1:6){
-  yy = invlogit(vmat[i,1]+xx*vmat[i,3])
-  lines(xx, yy, col=cols[i])
-}
-
-plot(xx, seq(0, 1, length.out=10), col="white")
-for(i in 1:6){
-  yy = invlogit(vmat[i,1]+xx*vmat[i,4])
-  lines(xx, yy, col=cols[i])
-}
-
-x11(height=7, width=7)
-par(mfrow=c(2,2))
-
-plot(xx, seq(0, 1, length.out=10), col="white")
-for(i in 1:6){
-  yy = invlogit(fmat[i,1]+xx*fmat[i,2])
-  lines(xx, yy, col=cols[i])
-}
-
-plot(xx, seq(0, 1, length.out=10), col="white")
-for(i in 1:6){
-  yy = invlogit(fmat[i,1]+xx*fmat[i,3])
-  lines(xx, yy, col=cols[i])
-}
-
-plot(xx, seq(0, 1, length.out=10), col="white")
-for(i in 1:6){
-  yy = invlogit(fmat[i,1]+xx*fmat[i,4])
-  lines(xx, yy, col=cols[i])
-}
-
-plot(xx, seq(0, 1, length.out=10), col="white")
-for(i in 1:6){
-  yy = invlogit(fmat[i,1]+xx*fmat[i,5])
-  lines(xx, yy, col=cols[i])
-}
 
 # Deposition vs. removal ####
 fmat
@@ -349,3 +266,88 @@ m = summary(lm(mmat$spur_length_c~fmat$spur_length_c))$coef
 xx = seq(min(fmat$spur_length_c), max(fmat$spur_length_c), 0.01)
 yy = m[1,1] + m[2,1]*xx
 lines(xx, yy, col=cols[4])
+
+# Misc plots ####
+vmat
+xx = seq(-1, 1, length.out=10)
+cols = 1:6
+
+x11(height=3.5, width=9)
+par(mfrow=c(1,3))
+
+plot(xx, seq(0, 1, length.out=10), col="white")
+for(i in 1:6){
+  yy = invlogit(vmat[i,1]+xx*vmat[i,2])
+  lines(xx, yy, col=cols[i])
+}
+
+plot(xx, seq(0, 1, length.out=10), col="white")
+for(i in 1:6){
+  yy = invlogit(vmat[i,1]+xx*vmat[i,3])
+  lines(xx, yy, col=cols[i])
+}
+
+plot(xx, seq(0, 1, length.out=10), col="white")
+for(i in 1:6){
+  yy = invlogit(vmat[i,1]+xx*vmat[i,4])
+  lines(xx, yy, col=cols[i])
+}
+
+x11(height=7, width=7)
+par(mfrow=c(2,2))
+
+plot(xx, seq(0, 1, length.out=10), col="white")
+for(i in 1:6){
+  yy = invlogit(fmat[i,1]+xx*fmat[i,2])
+  lines(xx, yy, col=cols[i])
+}
+
+plot(xx, seq(0, 1, length.out=10), col="white")
+for(i in 1:6){
+  yy = invlogit(fmat[i,1]+xx*fmat[i,3])
+  lines(xx, yy, col=cols[i])
+}
+
+plot(xx, seq(0, 1, length.out=10), col="white")
+for(i in 1:6){
+  yy = invlogit(fmat[i,1]+xx*fmat[i,4])
+  lines(xx, yy, col=cols[i])
+}
+
+plot(xx, seq(0, 1, length.out=10), col="white")
+for(i in 1:6){
+  yy = invlogit(fmat[i,1]+xx*fmat[i,5])
+  lines(xx, yy, col=cols[i])
+}
+
+# Beta naive summary
+
+naivemat = data.frame(
+  summary(mnaivelist[[1]])$coef[-1,1],
+  summary(mnaivelist[[2]])$coef[-1,1],
+  summary(mnaivelist[[3]])$coef[-1,1],
+  summary(mnaivelist[[6]])$coef[-1,1]
+)
+colnames(naivemat) = names(mnaivelist)[c(1:3, 6)]
+
+naivemat = as.data.frame(t(naivemat))
+naivemat
+
+betatable
+
+cor(betatable$Flowers[c(1:3,6)], naivemat$flowers_open_c*100)
+cor(betatable$Height[c(1:3,6)], naivemat$height_c*100)
+cor(betatable$`Flower size`[c(1:3,6)], naivemat$flower_size_c*100)
+cor(betatable$`Spur length`[c(1:3,6)], naivemat$spur_length_c*100)
+
+x11()
+plot(betatable$`Spur length`[c(1:3,6)], naivemat$spur_length_c*100,
+     xlim=c(-50, 100), ylim=c(-50, 200))
+lines(-100:200, -100:200)
+points(betatable$`Flower size`[c(1:3,6)], naivemat$flower_size_c*100, col="blue", pch=16)
+points(betatable$Height[c(1:3,6)], naivemat$height_c*100, col="brown", pch=16)
+points(betatable$Flowers[c(1:3,6)], naivemat$flowers_open_c*100, col="green", pch=16)
+abline(h=0, lty=2)
+abline(v=0, lty=2)
+
+
